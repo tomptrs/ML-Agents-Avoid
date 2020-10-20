@@ -29,6 +29,7 @@ public class PlayerAvoidanceAgent : Agent
 
         transform.localPosition = idlePosition;
         moveTo = prevPosition = idlePosition;
+        TargetMoving.ResetTarget();
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -42,51 +43,72 @@ public class PlayerAvoidanceAgent : Agent
 
     public override void OnActionReceived(float[] vectorAction)
     {
-        prevPosition = moveTo;
-        int direction = Mathf.FloorToInt(vectorAction[0]);
-        moveTo = idlePosition;
+        Vector3 translation = Vector3.zero;
 
-        switch (direction)
+        float sense = 3f / 2f * Mathf.Pow(vectorAction[0], 2) - 5f / 2f * vectorAction[0];
+        translation = transform.right * speed * sense * Time.deltaTime;
+
+        transform.Translate(translation, Space.World);
+
+        if (Mathf.Abs(transform.localPosition.x) > 10)
         {
-            case 0:
-                moveTo = idlePosition;
-                break;
-            case 1:
-                moveTo = leftPostiion;
-                break;
-            case 2:
-                moveTo = rightPosition;
-                break;
+            AddReward(-1f);
         }
 
-//        transform.localPosition = idlePosition; => de agent zal te snel bewegen om collisions te detecteren
+        AddReward(0.001f);
 
-        transform.localPosition = Vector3.MoveTowards(transform.localPosition, moveTo, Time.deltaTime * speed);
+        //        //prevPosition = moveTo;
+        //        int direction = Mathf.FloorToInt(vectorAction[0]);
+        //        moveTo = idlePosition;
 
-        if (prevPosition == moveTo)
-            punishCounter++;
+        //        switch (direction)
+        //        {
+        //            case 0:
+        //                moveTo = idlePosition;
+        //                break;
+        //            case 1:
+        //                moveTo = leftPostiion;
+        //                break;
+        //            case 2:
+        //                moveTo = rightPosition;
+        //                break;
+        //        }
 
-        if (punishCounter > 2)
-        {
-            AddReward(-0.01f);
-            punishCounter = 0;
-        }
+        ////        transform.localPosition = idlePosition; => de agent zal te snel bewegen om collisions te detecteren
+
+        //        transform.localPosition = Vector3.MoveTowards(transform.localPosition, moveTo, Time.deltaTime * speed);
+
+        //        if (Mathf.Abs(transform.localPosition.x) > 10)
+        //        {
+        //            AddReward(-1f);
+        //        }
+
+        //        AddReward(0.001f);
+
+        //        //if (prevPosition == moveTo)
+        //        //    punishCounter++;
+
+        //        //if (punishCounter > 2)
+        //        //{
+        //        //    AddReward(-0.01f);
+        //        //    punishCounter = 0;
+        //}
 
     }
 
-    public void TakeAwayPoints()
-    {
-        AddReward(-0.5f);
-        TargetMoving.ResetTarget();
-        EndEpisode();
-    }
+    //public void TakeAwayPoints()
+    //{
+    //    AddReward(-0.5f);
+    //    TargetMoving.ResetTarget();
+    //    EndEpisode();
+    //}
 
-    public void GivePoints()
-    {
-        AddReward(1f);
-        TargetMoving.ResetTarget();
-        EndEpisode();
-    }
+    //public void GivePoints()
+    //{
+    //    AddReward(1f);
+    //    TargetMoving.ResetTarget();
+    //    EndEpisode();
+    //}
 
     public override void Heuristic(float[] actionsOut)
     {

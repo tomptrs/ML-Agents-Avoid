@@ -34,22 +34,40 @@ public class TargetMoving : MonoBehaviour
     {
         transform.localPosition = originalPosition;
         transform.localRotation = Quaternion.identity;
+        GetComponent<Rigidbody>().velocity = Vector3.zero;
+        GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+
+
     }
 
-    private void OnTriggerEnter(Collider other)
+    //private void OnTriggerEnter(Collider other)
+    //{
+    //    if (other.transform.tag == "player")
+    //    {
+    //        Agent.AddReward(-1f);
+    //        Agent.EndEpisode();
+    //    }
+    //    if (other.transform.tag == "wall")
+    //    {
+    //        Agent.AddReward(1f);
+    //        Agent.EndEpisode();
+
+    //    }
+    //}
+
+    private void OnCollisionEnter(Collision collision)
     {
-        if (other.transform.tag == "player")
+        if (collision.transform.CompareTag("player"))
         {
-            Agent.TakeAwayPoints();
+            Agent.AddReward(-1f);
+            Agent.EndEpisode();
         }
-        if (other.transform.tag == "wall")
-        {  
-            transform.localPosition = originalPosition;
-            Debug.Log(originalPosition);
-            Agent.GivePoints();
-          
+        if (collision.transform.CompareTag("wall"))
+        {
+            Agent.AddReward(1f);
+            Agent.EndEpisode();
         }
     }
 
-   
+
 }
